@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 import ua.plugins.*
 
 fun main() {
+    //Some init test for test-init-branch
     embeddedServer(CIO, port = 8080, host = "0.0.0.0") {
         configureRouting()
         configureSerialization()

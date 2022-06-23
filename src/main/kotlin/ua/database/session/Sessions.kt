@@ -3,29 +3,39 @@ package ua.database.session
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
 
-object Sessions: Table("sessions") {
-    private val id = Sessions.integer("id")
-    private val playerGroupId = Sessions.integer("player_group_id")
+object Sessions : Table("sessions") {
+    private val sessionId = Sessions.varchar("session_id", 50)
     private val countPlayers = Sessions.integer("count_players")
-    private val sessionId = Sessions.integer("session_id")
+    private val dateOfCreation = Sessions.varchar("date_of_creation", 50)
+    private val sessionCode = Sessions.varchar("session_code", 50)
 
     fun insert(sessionDto: SessionDto) {
-        Sessions.insert {
-            it[id] = sessionDto.id
-            it[playerGroupId] = sessionDto.playerGroupId
-            it[countPlayers] = sessionDto.countPlayers
-            it[sessionId] = sessionDto.sessionId
+        transaction {
+            Sessions.insert {
+                it[sessionId] = sessionDto.sessionId
+                it[countPlayers] = sessionDto.countPlayers
+                it[dateOfCreation] = sessionDto.dateOfCreation
+                it[sessionCode] = sessionDto.sessionCode
+            }
         }
     }
 
-    fun getSession(sessionId: Int): SessionDto {
-        val sessionModel = Sessions.select { Sessions.sessionId.eq(sessionId) }.single()
-        return SessionDto(
-            id = sessionModel[Sessions.id],
-            playerGroupId = sessionModel[Sessions.playerGroupId],
-            countPlayers = sessionModel[Sessions.countPlayers],
-            sessionId = sessionModel[Sessions.sessionId]
-        )
+    fun getSession(sessionCode: String): SessionDto? {
+        return try {
+            transaction {
+                val sessionModel = Sessions.select { Sessions.sessionCode.eq(sessionCode) }.single()
+                SessionDto(
+                    sessionId = sessionModel[Sessions.sessionId],
+                    dateOfCreation = sessionModel[Sessions.dateOfCreation],
+                    countPlayers = sessionModel[Sessions.countPlayers],
+                    sessionCode = sessionModel[Sessions.sessionCode]
+                )
+            }
+        } catch (exc: Exception) {
+            exc.printStackTrace()
+            null
+        }
     }
 }

@@ -5,7 +5,7 @@ import io.ktor.server.routing.*
 
 fun Application.configureSessionRouting() {
     routing {
-        post("/session") {
+        post("/sessions/create") {
             val sessionsController = SessionsController(call)
             sessionsController.createSession()
         }

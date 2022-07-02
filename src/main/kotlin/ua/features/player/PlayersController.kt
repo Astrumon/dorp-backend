@@ -11,7 +11,6 @@ import ua.database.player.Players
 import ua.database.session.Sessions
 import ua.features.player.entity.Player
 import ua.features.player.entity.mapToPlayer
-import ua.features.session.SessionResponseRemote
 import ua.features.session.entity.Session
 import ua.features.session.entity.mapToSession
 import java.util.UUID
@@ -26,23 +25,23 @@ class PlayersController(val call: ApplicationCall) {
 
     private suspend fun savePlayerToSessionDb(playerReceive: PlayerReceive) {
         try {
+            if (!isValidCode(playerReceive.sessionCode))  {
+                call.respond(HttpStatusCode.Conflict, "Session code is not valid")
+                return
+            }
+
             val session = getSession(playerReceive.sessionCode)
+            val sessionId = session.sessionId
             val countOfPlayers = session.countPlayers
-            val players = getPlayers(session.sessionId)
 
-            if (players.size < countOfPlayers) {
+            if (getPlayers(sessionId).size < countOfPlayers) {
 
-                if (!checkData(playerReceive, session.sessionId)) return
+                if (isNotValidName(playerReceive, sessionId)) return
 
                 val playerId = UUID.randomUUID().toString()
-                Players.insertPlayer(
-                    PlayerDto(
-                        playerId,
-                        playerReceive.playerName,
-                        session.sessionId,
-                        playerReceive.sessionCode
-                    )
-                )
+                val playerDto = PlayerDto(playerId, playerReceive.playerName, sessionId, playerReceive.sessionCode)
+
+                Players.insertPlayer(playerDto)
                 call.respond(HttpStatusCode.OK)
             } else {
                 call.respond(
@@ -50,7 +49,6 @@ class PlayersController(val call: ApplicationCall) {
                     "Limit count players in the one session (session max count players: $countOfPlayers)"
                 )
             }
-
         } catch (exc: ExposedSQLException) {
             call.respond(HttpStatusCode.Conflict, exc.toString())
         } catch (exc: Exception) {
@@ -58,21 +56,17 @@ class PlayersController(val call: ApplicationCall) {
         }
     }
 
-    private suspend fun checkData(playerReceive: PlayerReceive, sessionId: String): Boolean {
+    private suspend fun isNotValidName(playerReceive: PlayerReceive, sessionId: String): Boolean {
         return when {
-            !checkPlayerName(playerReceive.playerName,sessionId) -> {
-                call.respond(HttpStatusCode.Conflict, "This player name is already has")
-                 false
-            }
-            !isValidCode(playerReceive.sessionCode) -> {
-                call.respond(HttpStatusCode.Conflict, "Session code is not valid")
-               false
-            }
             !isValidName(playerReceive.playerName) -> {
                 call.respond(HttpStatusCode.Conflict, "Player name is not valid")
-                false
+                true
             }
-            else -> true
+            !checkPlayerName(playerReceive.playerName, sessionId) -> {
+                call.respond(HttpStatusCode.Conflict, "This player name in this $sessionId session is already has")
+                true
+            }
+            else -> false
         }
     }
 
@@ -82,13 +76,9 @@ class PlayersController(val call: ApplicationCall) {
         return players.isEmpty() || players.find { it.playerName == name } == null
     }
 
-    private fun isValidCode(code: String): Boolean {
-        return true
-    }
+    private fun isValidCode(code: String): Boolean = code.matches(Regex("^[A-Z\\d]{6}+"))
 
-    private fun isValidName(name: String): Boolean {
-        return true
-    }
+    private fun isValidName(name: String): Boolean = name.length <= 10
 
     private fun getSession(sessionCode: String): Session =
         Sessions.getSession(sessionCode)?.mapToSession()

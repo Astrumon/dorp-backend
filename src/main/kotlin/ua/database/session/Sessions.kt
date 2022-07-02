@@ -6,10 +6,10 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Sessions : Table("sessions") {
-    private val sessionId = Sessions.varchar("session_id", 50)
+    private val sessionId = Sessions.varchar("session_id", 50).uniqueIndex()
     private val countPlayers = Sessions.integer("count_players")
     private val dateOfCreation = Sessions.varchar("date_of_creation", 50)
-    private val sessionCode = Sessions.varchar("session_code", 50)
+    private val sessionCode = Sessions.varchar("session_code", 50).uniqueIndex()
 
     fun insert(sessionDto: SessionDto) {
         transaction {
@@ -27,9 +27,9 @@ object Sessions : Table("sessions") {
             transaction {
                 val sessionModel = Sessions.select { Sessions.sessionCode.eq(sessionCode) }.single()
                 SessionDto(
-                    sessionId = sessionModel[Sessions.sessionId],
-                    dateOfCreation = sessionModel[Sessions.dateOfCreation],
-                    countPlayers = sessionModel[Sessions.countPlayers],
+                    sessionId = sessionModel[sessionId],
+                    dateOfCreation = sessionModel[dateOfCreation],
+                    countPlayers = sessionModel[countPlayers],
                     sessionCode = sessionModel[Sessions.sessionCode]
                 )
             }

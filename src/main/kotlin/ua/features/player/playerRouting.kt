@@ -6,7 +6,8 @@ import io.ktor.server.routing.*
 fun Application.configurePlayerRouting() {
     routing {
         post("/players/join") {
-
+            val playersController = PlayersController(call)
+            playersController.joinPlayerToSession()
         }
     }
 }

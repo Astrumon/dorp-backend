@@ -3,6 +3,7 @@ package ua
 import io.ktor.server.engine.*
 import io.ktor.server.cio.*
 import org.jetbrains.exposed.sql.Database
+import ua.features.player.configurePlayerRouting
 import ua.features.session.configureSessionRouting
 import ua.plugins.*
 
@@ -18,6 +19,7 @@ fun main() {
         configureRouting()
         configureSessionRouting()
         configureSerialization()
+        configurePlayerRouting()
     }.start(wait = true)
 }
 

@@ -11,7 +11,15 @@ import ua.utils.generateRandomCode
 import ua.utils.getCurrentDate
 import java.util.UUID
 
-class SessionsController(val call: ApplicationCall) {
+class SessionsController() {
+
+    private var _call: ApplicationCall? = null
+    private val call: ApplicationCall get() = _call!!
+
+    fun setApplicationCall(call: ApplicationCall) {
+        _call = call
+    }
+
     suspend fun createSession() {
         val receive = call.receive<SessionReceiveRemote>()
         val countOfPlayers = receive.countOfPlayers

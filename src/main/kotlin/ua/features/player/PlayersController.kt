@@ -6,6 +6,7 @@ import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import org.jetbrains.exposed.exceptions.ExposedSQLException
+import org.koin.java.KoinJavaComponent.inject
 import ua.database.player.PlayerDto
 import ua.database.player.Players
 import ua.database.session.Sessions
@@ -15,14 +16,23 @@ import ua.features.session.entity.Session
 import ua.features.session.entity.mapToSession
 import java.util.UUID
 
-class PlayersController(val call: ApplicationCall) {
+class PlayersController {
+    private var _call: ApplicationCall? = null
+    private val call: ApplicationCall get() = _call!!
 
-    suspend fun joinPlayerToSession() {
-        val receive = call.receive<PlayerReceive>()
-
-        savePlayerToSessionDb(receive)
+    fun setApplicationCall(call: ApplicationCall) {
+        _call = call
     }
 
+    suspend fun joinPlayerToSession() {
+        try {
+            val receive = call.receive<PlayerReceive>()
+
+            savePlayerToSessionDb(receive)
+        } catch (exc: java.lang.NullPointerException) {
+            println("Set Application Call first $exc")
+        }
+    }
     private suspend fun savePlayerToSessionDb(playerReceive: PlayerReceive) {
         try {
             if (!isValidCode(playerReceive.sessionCode))  {

@@ -20,60 +20,72 @@ class PlayersController {
     private var _call: ApplicationCall? = null
     private val call: ApplicationCall get() = _call!!
 
-    fun setApplicationCall(call: ApplicationCall) {
+    suspend fun joinPlayerToSession(call: ApplicationCall) {
         _call = call
-    }
+        val receive = call.receive<PlayerReceive>()
 
-    suspend fun joinPlayerToSession() {
-        try {
-            val receive = call.receive<PlayerReceive>()
+        val session = getSession(receive.sessionCode)
 
-            savePlayerToSessionDb(receive)
-        } catch (exc: java.lang.NullPointerException) {
-            println("Set Application Call first $exc")
+        val playerId = UUID.randomUUID().toString()
+        val playerDto = PlayerDto(playerId, receive.playerName, session.sessionId, receive.sessionCode)
+
+        if (savePlayerToSessionDb(playerDto, session.countPlayers)) {
+            call.respond(HttpStatusCode.OK, PlayerResponse(playerId))
         }
     }
-    private suspend fun savePlayerToSessionDb(playerReceive: PlayerReceive) {
-        try {
-            if (!isValidCode(playerReceive.sessionCode))  {
+    suspend fun deletePlayer(call: ApplicationCall) {
+        val playerId = call.parameters["player_id"]
+        if (!playerId.isNullOrEmpty()) {
+            if (Players.deletePlayerById(playerId)) call.respond(HttpStatusCode.OK)
+            else call.respond(HttpStatusCode.NotFound, "Player with $playerId cannot find")
+        } else {
+            call.respond(HttpStatusCode.BadRequest, "Player with $playerId cannot delete")
+        }
+    }
+
+    private suspend fun savePlayerToSessionDb(playerDto: PlayerDto, countOfPlayers: Int): Boolean {
+        return try {
+            if (!isValidCode(playerDto.sessionCode)) {
                 call.respond(HttpStatusCode.Conflict, "Session code is not valid")
-                return
+                return false
             }
 
-            val session = getSession(playerReceive.sessionCode)
-            val sessionId = session.sessionId
-            val countOfPlayers = session.countPlayers
+           return if (getPlayers(playerDto.sessionId).size < countOfPlayers) {
 
-            if (getPlayers(sessionId).size < countOfPlayers) {
-
-                if (isNotValidName(playerReceive, sessionId)) return
-
-                val playerId = UUID.randomUUID().toString()
-                val playerDto = PlayerDto(playerId, playerReceive.playerName, sessionId, playerReceive.sessionCode)
+                if (isNotValidName(playerDto)) return false
 
                 Players.insertPlayer(playerDto)
-                call.respond(HttpStatusCode.OK)
+                true
             } else {
                 call.respond(
                     HttpStatusCode.BadRequest,
                     "Limit count players in the one session (session max count players: $countOfPlayers)"
                 )
+                false
             }
         } catch (exc: ExposedSQLException) {
             call.respond(HttpStatusCode.Conflict, exc.toString())
+            false
+        } catch (exc: NullPointerException) {
+            exc.printStackTrace()
+            false
         } catch (exc: Exception) {
             call.respond(HttpStatusCode.BadRequest, "Can't join player to session ${exc.localizedMessage}")
+            false
         }
     }
 
-    private suspend fun isNotValidName(playerReceive: PlayerReceive, sessionId: String): Boolean {
+    private suspend fun isNotValidName(playerDto: PlayerDto): Boolean {
         return when {
-            !isValidName(playerReceive.playerName) -> {
+            !isValidName(playerDto.playerName) -> {
                 call.respond(HttpStatusCode.Conflict, "Player name is not valid")
                 true
             }
-            !checkPlayerName(playerReceive.playerName, sessionId) -> {
-                call.respond(HttpStatusCode.Conflict, "This player name in this $sessionId session is already has")
+            !checkPlayerName(playerDto.playerName, playerDto.sessionId) -> {
+                call.respond(
+                    HttpStatusCode.Conflict,
+                    "This player name in this ${playerDto.sessionId} session is already has"
+                )
                 true
             }
             else -> false

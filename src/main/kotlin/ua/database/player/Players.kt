@@ -1,14 +1,11 @@
 package ua.database.player
 
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Players : Table("players") {
     val playerId = Players.varchar("player_id", 50).uniqueIndex()
-    val playerName = Players.varchar("player_name", 10).uniqueIndex()
+    val playerName = Players.varchar("player_name", 10)
     val sessionId = Players.varchar("session_id", 50)
     val sessionCode = Players.varchar("session_code", 20)
 
@@ -20,6 +17,20 @@ object Players : Table("players") {
                 it[sessionId] = playerDto.sessionId
                 it[sessionCode] = playerDto.sessionCode
             }
+        }
+    }
+
+    fun deletePlayerById(playerId: String): Boolean {
+        return try {
+            transaction {
+                deleteWhere {
+                    this@Players.playerId.eq(playerId)
+                }
+            }
+            true
+        } catch (exc: Exception) {
+            exc.printStackTrace()
+            false
         }
     }
 

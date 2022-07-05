@@ -16,11 +16,8 @@ class SessionsController() {
     private var _call: ApplicationCall? = null
     private val call: ApplicationCall get() = _call!!
 
-    fun setApplicationCall(call: ApplicationCall) {
+    suspend fun createSession(call: ApplicationCall) {
         _call = call
-    }
-
-    suspend fun createSession() {
         val receive = call.receive<SessionReceiveRemote>()
         val countOfPlayers = receive.countOfPlayers
         if (countOfPlayers < 2) call.respond(HttpStatusCode.BadRequest, "Count of players must be more than 1")
@@ -40,6 +37,8 @@ class SessionsController() {
             Sessions.insert(sessionDto)
         } catch (exc: ExposedSQLException) {
             call.respond(HttpStatusCode.Conflict, exc.toString())
+        } catch (exc: NullPointerException) {
+            exc.printStackTrace()
         } catch (exc: Exception) {
             call.respond(HttpStatusCode.BadRequest, "Can't create session ${exc.localizedMessage}")
         }

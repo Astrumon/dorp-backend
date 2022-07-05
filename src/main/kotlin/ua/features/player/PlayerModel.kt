@@ -8,3 +8,8 @@ data class PlayerReceive(
     val sessionCode: String
 )
 
+@Serializable
+data class PlayerResponse(
+    val playerId: String
+)
+

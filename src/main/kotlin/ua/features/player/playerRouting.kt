@@ -10,8 +10,15 @@ fun Application.configurePlayerRouting() {
 
     routing {
         post("/players/join") {
-            playersController.setApplicationCall(call)
-            playersController.joinPlayerToSession()
+            playersController.joinPlayerToSession(call)
+        }
+
+        delete("/players/{player_id}/delete") {
+            playersController.deletePlayer(call)
+        }
+
+        delete("/players/{player_id}/exit") {
+
         }
     }
 }

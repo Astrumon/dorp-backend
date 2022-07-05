@@ -12,8 +12,7 @@ fun Application.configureSessionRouting() {
 
     routing {
         post("/sessions/create") {
-            sessionsController.setApplicationCall(call)
-            sessionsController.createSession()
+            sessionsController.createSession(call)
         }
     }
 }

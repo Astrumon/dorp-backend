@@ -69,6 +69,4 @@ object Players : Table("players") {
             null
         }
     }
-
-
 }

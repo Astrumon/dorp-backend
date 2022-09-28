@@ -20,5 +20,9 @@ fun Application.configurePlayerRouting() {
         delete("/players/{player_id}/exit") {
 
         }
+
+        get("/players/list/{session_id}") {
+            playersController.getAllPlayers(call)
+        }
     }
 }

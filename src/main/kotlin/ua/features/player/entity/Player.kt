@@ -2,6 +2,7 @@ package ua.features.player.entity
 
 import ua.database.player.PlayerDto
 
+@kotlinx.serialization.Serializable
 data class Player(
     val playerId: String,
     val playerName: String,

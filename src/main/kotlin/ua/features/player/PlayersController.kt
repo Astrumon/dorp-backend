@@ -33,6 +33,7 @@ class PlayersController {
             call.respond(HttpStatusCode.OK, PlayerResponse(playerId))
         }
     }
+
     suspend fun deletePlayer(call: ApplicationCall) {
         val playerId = call.parameters["player_id"]
         if (!playerId.isNullOrEmpty()) {
@@ -43,6 +44,17 @@ class PlayersController {
         }
     }
 
+    suspend fun getAllPlayers(call: ApplicationCall) {
+        val sessionId = call.parameters["session_id"]
+        if (!sessionId.isNullOrEmpty()) {
+            val players = Players.getPlayersBySessionId(sessionId) ?: emptyList()
+            if (players.isNotEmpty()) call.respond(PlayerListResponse(players.map { it.mapToPlayer() }))
+            else call.respond(HttpStatusCode.BadRequest, "Cannot find players with this $sessionId id")
+        } else {
+            call.respond(HttpStatusCode.BadRequest, "this $sessionId id is doesn't exist")
+        }
+    }
+
     private suspend fun savePlayerToSessionDb(playerDto: PlayerDto, countOfPlayers: Int): Boolean {
         return try {
             if (!isValidCode(playerDto.sessionCode)) {
@@ -50,7 +62,7 @@ class PlayersController {
                 return false
             }
 
-           return if (getPlayers(playerDto.sessionId).size < countOfPlayers) {
+            return if (getPlayers(playerDto.sessionId).size < countOfPlayers) {
 
                 if (isNotValidName(playerDto)) return false
 

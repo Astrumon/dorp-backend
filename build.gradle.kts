@@ -33,6 +33,10 @@ dependencies {
     implementation("io.ktor:ktor-server-cio-jvm:$ktor_version")
 
     implementation("ch.qos.logback:logback-classic:$logback_version")
+
+    //Test
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")
+    testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 

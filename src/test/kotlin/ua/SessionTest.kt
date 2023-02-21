@@ -8,8 +8,9 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
 import org.junit.Test
-import ua.features.session.SessionReceiveRemote
-import ua.features.session.SessionResponseRemote
+import ua.features.session.CREATE_SESSION_URL_PATH
+import ua.model.SessionReceiveRemote
+import ua.model.SessionResponseRemote
 import ua.features.session.configureSessionRouting
 import java.util.regex.Pattern
 import kotlin.test.assertEquals
@@ -29,7 +30,7 @@ class SessionTest {
         }
 
     private suspend fun ApplicationTestBuilder.createSession(httpRequestBuilder: HttpRequestBuilder.() -> Unit) =
-        sessionClient.post(SESSION_ENDPOINT) {
+        sessionClient.post(CREATE_SESSION_URL_PATH) {
             contentType(ContentType.Application.Json)
             httpRequestBuilder()
         }
@@ -60,9 +61,5 @@ class SessionTest {
         val isValid = Pattern.compile("[A-Z-\\d]{6}").matcher(sessionCode).find()
 
         assertEquals(isValid, true)
-    }
-
-    companion object {
-        private const val SESSION_ENDPOINT = "/sessions/create"
     }
 }

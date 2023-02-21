@@ -1,4 +1,4 @@
-package ua.features.session
+package ua.model
 
 @kotlinx.serialization.Serializable
 data class SessionReceiveRemote(

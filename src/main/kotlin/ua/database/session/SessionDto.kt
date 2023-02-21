@@ -1,11 +1,10 @@
 package ua.database.session
 
-import ua.features.session.SessionReceiveRemote
-import ua.features.session.entity.Session
+import java.util.UUID
 
 data class SessionDto(
-    val sessionId: String,
+    val sessionId: UUID,
     val countPlayers: Int,
-    val dateOfCreation: String,
+    val dateOfCreation: Long,
     val sessionCode: String
 )

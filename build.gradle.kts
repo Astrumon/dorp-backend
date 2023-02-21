@@ -31,8 +31,9 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("io.ktor:ktor-server-cio-jvm:$ktor_version")
-
     implementation("ch.qos.logback:logback-classic:$logback_version")
+
+    implementation("io.ktor:ktor-server-status-pages:$ktor_version")
 
     //Test
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlin_version")

@@ -4,13 +4,11 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.cio.*
 import org.jetbrains.exposed.sql.Database
-import org.koin.ktor.ext.inject
 import org.koin.ktor.plugin.Koin
-import ua.di.mainModule
-import ua.features.player.configurePlayerRouting
-import ua.features.session.configureSessionRouting
-import ua.plugins.*
 import org.koin.logger.slf4jLogger
+import ua.api.injection.ApiInjection
+import ua.database.injection.DaoInjection
+import ua.modules.injection.ModulesInjection
 
 fun main(args: Array<String>) {
     embeddedServer(CIO, commandLineEnvironment(args)).start(wait = true)
@@ -24,12 +22,13 @@ fun Application.module() {
     connectToDb(dbUrl, dbUser, dbPassword)
     install(Koin) {
         slf4jLogger()
-        modules(mainModule)
+        modules(
+            ApiInjection.koinBeans,
+            DaoInjection.koinBeans,
+            ModulesInjection.koinBeans
+        )
     }
-    configureRouting()
-    configureSessionRouting()
-    configurePlayerRouting()
-    configureSerialization()
+    applicationModule()
 }
 
 fun connectToDb(url: String, user: String, password: String) {

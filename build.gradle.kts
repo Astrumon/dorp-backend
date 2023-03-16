@@ -5,6 +5,10 @@ val kotlin_version: String by project
 val logback_version: String by project
 val exposed_version: String by project
 val koin_version: String by project
+val jupiter_version: String by project
+val mock_version: String by project
+val assertj_core_version: String by project
+val postgresql_version: String by project
 
 plugins {
     application
@@ -40,6 +44,10 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("org.junit.jupiter:junit-jupiter:$jupiter_version")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiter_version")
+    testImplementation("io.mockk:mockk:$mock_version")
+    testImplementation("org.assertj:assertj-core:$assertj_core_version")
 
     //Serialization
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
@@ -49,7 +57,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
 
-    implementation("org.postgresql:postgresql:42.3.6")
+    implementation("org.postgresql:postgresql:$postgresql_version")
 
     //DI
     implementation("io.insert-koin:koin-ktor:$koin_version")

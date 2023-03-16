@@ -16,14 +16,11 @@ object SessionApiImpl : SessionApi, KoinComponent {
     private val sessionDao by inject<SessionDao>()
 
     override fun createSession(sessionReceiveRemote: SessionReceiveRemote): SessionResponseRemote {
-        val countOfPlayers = sessionReceiveRemote.countOfPlayers
-        if (countOfPlayers < 2) throw InvalidSessionValidateException()
-
         val sessionCode = generateRandomCode(6)
 
         val dto = SessionDto(
             sessionId = UUID.randomUUID(),
-            countPlayers = countOfPlayers,
+            countPlayers = sessionReceiveRemote.countOfPlayers,
             dateOfCreation = System.currentTimeMillis(),
             sessionCode = sessionCode
         )

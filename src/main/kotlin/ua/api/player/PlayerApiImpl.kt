@@ -24,7 +24,11 @@ object PlayerApiImpl : PlayerApi, KoinComponent {
             sessionId = sessionId
         )
 
-        playerDao.insertPlayer(playerDto) ?: throw InvalidPlayerException("Error while creating user")
+        try {
+            playerDao.insertPlayer(playerDto) ?: throw InvalidPlayerException("Error while creating user")
+        } catch (exc: Exception) {
+            throw InvalidPlayerException("Cannot join this player to this $sessionId session; ${exc.message}")
+        }
         return PlayerResponse(playerId.toString())
     }
 

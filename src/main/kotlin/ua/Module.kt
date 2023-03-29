@@ -35,10 +35,6 @@ fun Application.applicationModule() {
             call.respond(HttpStatusCode.BadRequest, exc.message)
         }
 
-        exception<InvalidPlayerException> { call, exc ->
-            call.respond(HttpStatusCode.BadRequest, exc.message)
-        }
-
         exception<UnknownError> { call, _ ->
             call.respondText(
                 "Internal server error",

@@ -17,9 +17,10 @@ import ua.model.SessionReceiveRemote
 import ua.model.SessionResponseRemote
 import ua.modules.session.SessionControllerImpl
 import ua.statuspages.InvalidSessionValidateException
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CreateSessionTest {
+class SessionTest {
 
     private val sessionApi: SessionApi = mockk()
     private val sessionController: SessionController by lazy { SessionControllerImpl() }
@@ -70,5 +71,17 @@ class CreateSessionTest {
                 sessionController.createSession(postBody)
             }
         }
+    }
+
+    @Test
+    fun `get successful session id by session code`() {
+        val sessionCode = "5GJ3IL"
+        val returnedUUID = UUID.randomUUID()
+
+        coEvery { sessionApi.getSessionIdByCode(sessionCode) } returns returnedUUID
+
+        val response = sessionApi.getSessionIdByCode(sessionCode)
+
+        assertThat(response).isEqualTo(returnedUUID)
     }
 }

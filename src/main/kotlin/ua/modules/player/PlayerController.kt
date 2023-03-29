@@ -8,6 +8,9 @@ import ua.model.PlayerListResponse
 import ua.model.PlayerReceive
 import ua.model.PlayerResponse
 import ua.statuspages.InvalidPlayerException
+import ua.statuspages.InvalidSessionCode
+import ua.utils.Validation
+import ua.utils.isNullOrEmptyString
 import java.util.*
 
 class PlayerControllerImpl : PlayerController, KoinComponent {
@@ -16,17 +19,21 @@ class PlayerControllerImpl : PlayerController, KoinComponent {
     private val sessionApi by inject<SessionApi>()
 
     override fun joinPlayerToSession(playerReceive: PlayerReceive): PlayerResponse {
+        if (!Validation.isValidSessionCode(playerReceive.sessionCode)) throw InvalidSessionCode()
+
         val sessionId = sessionApi.getSessionIdByCode(playerReceive.sessionCode)
-            ?: throw InvalidPlayerException("cannot find sessionId by this sessionCode=${playerReceive.sessionCode}")
+            ?: throw InvalidPlayerException(
+                "cannot find sessionId by this sessionCode=${playerReceive.sessionCode}"
+            )
 
         return playerApi.joinPlayerToSession(playerReceive, sessionId)
     }
 
-    override fun deletePlayer(playerId: UUID?) {
-        playerId ?: throw InvalidPlayerException("playerId is null")
+    override fun deletePlayer(playerId: String?) {
+        if (playerId.isNullOrEmptyString()) throw InvalidPlayerException("playerId is null")
 
         try {
-            playerApi.deletePlayer(playerId)
+            playerApi.deletePlayer(UUID.fromString(playerId))
         } catch (exc: Exception) {
             throw InvalidPlayerException("cannot delete player with this playerId=$playerId: $exc")
         }
@@ -42,7 +49,7 @@ class PlayerControllerImpl : PlayerController, KoinComponent {
 interface PlayerController {
     fun joinPlayerToSession(playerReceive: PlayerReceive): PlayerResponse
 
-    fun deletePlayer(playerId: UUID?)
+    fun deletePlayer(playerId: String?)
 
     fun getAllPlayers(sessionId: UUID?): PlayerListResponse
 }

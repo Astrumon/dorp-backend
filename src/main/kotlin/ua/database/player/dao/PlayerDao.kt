@@ -9,8 +9,8 @@ import java.util.UUID
 object Players : Table("players"), PlayerDao {
     val id = integer("id").autoIncrement("players_id_seq")
     val playerId = uuid("player_id").uniqueIndex()
-    val playerName = varchar("player_name", 50)
-    val sessionId = uuid("session_id").uniqueIndex()
+    val playerName = varchar("player_name", 50).uniqueIndex()
+    val sessionId = uuid("session_id")
     val sessionCode = varchar("session_code", 20)
 
     override val primaryKey = PrimaryKey(id, name = "PK_Players")

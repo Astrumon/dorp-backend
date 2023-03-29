@@ -16,7 +16,7 @@ object SessionApiImpl : SessionApi, KoinComponent {
     private val sessionDao by inject<SessionDao>()
 
     override fun createSession(sessionReceiveRemote: SessionReceiveRemote): SessionResponseRemote {
-        val sessionCode = generateRandomCode(6)
+        val sessionCode = generateRandomCode()
 
         val dto = SessionDto(
             sessionId = UUID.randomUUID(),

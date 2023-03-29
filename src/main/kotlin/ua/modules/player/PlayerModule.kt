@@ -28,7 +28,7 @@ fun Route.playerModule() {
 
     delete(PLAYER_EXIT_URL_PATH) {
         val playerId = call.parameters["player_id"]
-        controller.deletePlayer(UUID.fromString(playerId))
+        controller.deletePlayer(playerId)
         sendOk()
     }
 }

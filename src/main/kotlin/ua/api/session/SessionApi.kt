@@ -1,12 +1,12 @@
 package ua.api.session
 
-import ua.model.SessionReceiveRemote
+import ua.database.session.SessionDto
 import ua.model.SessionResponseRemote
 import java.util.UUID
 
 interface SessionApi {
 
-    fun createSession(sessionReceiveRemote: SessionReceiveRemote): SessionResponseRemote
+    fun createSession(sessionDto: SessionDto): SessionResponseRemote
 
     fun getSessionIdByCode(code: String): UUID?
 

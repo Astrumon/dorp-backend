@@ -15,21 +15,13 @@ object PlayerApiImpl : PlayerApi, KoinComponent {
 
     private val playerDao by inject<PlayerDao>()
 
-    override fun joinPlayerToSession(playerReceive: PlayerReceive, sessionId: UUID): PlayerResponse {
-        val playerId = UUID.randomUUID()
-        val playerDto = PlayerDto(
-            playerId = playerId,
-            playerName = playerReceive.playerName,
-            sessionCode = playerReceive.sessionCode,
-            sessionId = sessionId
-        )
-
+    override fun joinPlayerToSession(playerDto: PlayerDto): PlayerResponse {
         try {
             playerDao.insertPlayer(playerDto) ?: throw InvalidPlayerException("Error while creating user")
         } catch (exc: Exception) {
-            throw InvalidPlayerException("Cannot join this player to this $sessionId session; ${exc.message}")
+            throw InvalidPlayerException("Cannot join this player to this ${playerDto.sessionId} session; ${exc.message}")
         }
-        return PlayerResponse(playerId.toString())
+        return PlayerResponse(playerDto.playerId.toString())
     }
 
     override fun getAllPlayers(sessionId: UUID): PlayerListResponse {

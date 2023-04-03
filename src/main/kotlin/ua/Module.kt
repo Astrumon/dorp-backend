@@ -14,6 +14,7 @@ import ua.api.player.PlayerApi
 import ua.api.session.SessionApi
 import ua.modules.player.playerModule
 import ua.modules.session.sessionModule
+import ua.modules.task.taskModule
 import ua.statuspages.*
 
 fun Application.applicationModule() {
@@ -22,17 +23,11 @@ fun Application.applicationModule() {
 
     install(StatusPages) {
         playerStatusPages()
+        taskStatusPages()
+        sessionStatusPage()
 
         exception<IllegalArgumentException> { call, _ ->
             call.respond(HttpStatusCode.BadRequest)
-        }
-
-        exception<InvalidSessionValidateException> { call, exc ->
-            call.respond(HttpStatusCode.BadRequest, exc.message)
-        }
-
-        exception<InvalidSessionException> { call, exc ->
-            call.respond(HttpStatusCode.BadRequest, exc.message)
         }
 
         exception<UnknownError> { call, _ ->
@@ -51,6 +46,7 @@ fun Application.applicationModule() {
     routing {
         playerModule()
         sessionModule()
+        taskModule()
     }
 }
 

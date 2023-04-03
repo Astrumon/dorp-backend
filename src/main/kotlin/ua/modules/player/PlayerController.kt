@@ -4,6 +4,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ua.api.player.PlayerApi
 import ua.api.session.SessionApi
+import ua.database.player.PlayerDto
 import ua.model.PlayerListResponse
 import ua.model.PlayerReceive
 import ua.model.PlayerResponse
@@ -26,7 +27,15 @@ class PlayerControllerImpl : PlayerController, KoinComponent {
                 "cannot find sessionId by this sessionCode=${playerReceive.sessionCode}"
             )
 
-        return playerApi.joinPlayerToSession(playerReceive, sessionId)
+        val playerId = UUID.randomUUID()
+        val playerDto = PlayerDto(
+            playerId = playerId,
+            playerName = playerReceive.playerName,
+            sessionCode = playerReceive.sessionCode,
+            sessionId = sessionId
+        )
+
+        return playerApi.joinPlayerToSession(playerDto)
     }
 
     override fun deletePlayer(playerId: String?) {

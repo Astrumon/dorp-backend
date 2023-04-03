@@ -5,7 +5,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 
 fun StatusPagesConfig.sessionStatusPage() {
-    exception<InvalidPlayerException> { call, cause ->
+    exception<InvalidSessionException> { call, cause ->
         call.respond(HttpStatusCode.BadRequest, cause.localizedMessage)
     }
     exception<InvalidSessionValidateException> { call, cause ->
